@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Two Lenses for Uncertainty: Bayesian vs. Frequentist Reasoning in Medicine</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+        }
+        .dark body {
+            background-color: #0b1120;
+            color: #e2e8f0;
+        }
+        .card {
+            background-color: #ffffff;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            transition: all 0.3s ease;
+        }
+        .dark .card {
+            background-color: #1e293b;
+            border: 1px solid #334155;
+        }
+        .frequentist-card { border-left: 4px solid #3b82f6; }
+        .bayesian-card { border-left: 4px solid #8b5cf6; }
+        .frequentist-header { background-color: #3b82f6; color: white; }
+        .bayesian-header { background-color: #8b5cf6; color: white; }
+
+        h1, h2, h3 {
+            font-weight: 700;
+        }
+
+        .fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .icon {
+            width: 1.5rem;
+            height: 1.5rem;
+            stroke-width: 2;
+        }
+        
+        /* Custom styles for the PE calculator */
+        .pe-step {
+            opacity: 0.3;
+            transition: opacity 0.5s ease-in-out;
+        }
+        .pe-step.active {
+            opacity: 1;
+        }
+        .probability-bar-bg {
+            background-color: #e5e7eb;
+        }
+        .dark .probability-bar-bg {
+             background-color: #4b5563;
+        }
+        .probability-bar {
+            transition: width 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+            background-color: #ef4444;
+        }
+    </style>
+</head>
+<body class="antialiased">
+    <!-- Dark Mode Toggle -->
+    <div class="fixed top-4 right-4 z-50">
+        <button id="darkModeToggle" class="p-2 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 shadow-md">
+            <svg id="moon-icon" class="h-6 w-6 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+            <svg id="sun-icon" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+        </button>
+    </div>
+
+    <div class="container mx-auto p-4 md:p-8 max-w-7xl">
+        <!-- Header -->
+        <header class="text-center mb-12 fade-in">
+             <div class="inline-block bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-sm font-semibold px-4 py-1 rounded-full mb-4">
+                For Emergency Clinicians & Researchers
+            </div>
+            <h1 class="text-4xl md:text-5xl font-bold text-slate-800 dark:text-slate-100">Two Lenses for Uncertainty</h1>
+            <p class="text-lg md:text-xl mt-4 text-slate-600 dark:text-slate-400">A Guide to Bayesian & Frequentist Reasoning in Medicine</p>
+        </header>
+
+        <!-- Core Philosophies Section -->
+        <section class="mb-16 fade-in">
+            <h2 class="text-3xl font-bold text-center mb-8 text-slate-800 dark:text-slate-100">Core Philosophies</h2>
+            <div class="grid md:grid-cols-2 gap-8">
+                <!-- Frequentist Philosophy -->
+                <div class="card frequentist-card p-6">
+                    <div class="flex items-center gap-4 mb-4">
+                        <div class="frequentist-header p-3 rounded-lg">
+                            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                        </div>
+                        <h3 class="text-2xl font-bold text-blue-600 dark:text-blue-400">The Frequentist Framework</h3>
+                    </div>
+                    <p class="text-slate-600 dark:text-slate-400 mb-4">Views probability as the <strong class="text-slate-700 dark:text-slate-300">long-run frequency</strong> of an event over infinite, repeated trials. It's the bedrock of most modern medical evidence.</p>
+                    <div class="space-y-3">
+                        <div class="flex items-start gap-3">
+                            <svg class="icon text-blue-500 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4M14 3v4m-2-2h4M17 17v4m-2-2h4M5 11h14"></path></svg>
+                            <p><strong>Analogy:</strong> The probability of a coin toss being 'heads' is 50% because, over millions of tosses, the proportion would converge to 0.5.</p>
+                        </div>
+                         <div class="flex items-start gap-3">
+                            <svg class="icon text-blue-500 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            <p><strong>Parameters are Fixed:</strong> The 'true' effect of a drug is a single, unknown constant. The data we collect is random.</p>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <svg class="icon text-blue-500 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                            <p><strong>Key Tools:</strong> P-values and Confidence Intervals are used to test a pre-defined 'Null Hypothesis' (e.g., "the drug has no effect").</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bayesian Philosophy -->
+                <div class="card bayesian-card p-6">
+                    <div class="flex items-center gap-4 mb-4">
+                        <div class="bayesian-header p-3 rounded-lg">
+                           <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg>
+                        </div>
+                        <h3 class="text-2xl font-bold text-violet-600 dark:text-violet-400">The Bayesian Paradigm</h3>
+                    </div>
+                    <p class="text-slate-600 dark:text-slate-400 mb-4">Views probability as a <strong class="text-slate-700 dark:text-slate-300">degree of belief</strong> in a proposition. This belief is updated as new evidence becomes available.</p>
+                     <div class="space-y-3">
+                        <div class="flex items-start gap-3">
+                            <svg class="icon text-violet-500 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8s-9-3.582-9-8 4.03-8 9-8 9 3.582 9 8z"></path></svg>
+                            <p><strong>Analogy:</strong> A clinician's initial suspicion for a diagnosis (prior belief) is updated by a new test result (evidence), leading to a revised diagnosis (posterior belief).</p>
+                        </div>
+                         <div class="flex items-start gap-3">
+                           <svg class="icon text-violet-500 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+                            <p><strong>Parameters are Random:</strong> The unknown drug effect is treated as a variable with a probability distribution representing our uncertainty about it.</p>
+                        </div>
+                        <div class="flex items-start gap-3">
+                             <svg class="icon text-violet-500 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2 1M4 7l2-1M4 7v2.5M12 21.5V14.5M4.5 12.5h15"></path></svg>
+                            <p><strong>Key Tools:</strong> Bayes' Theorem, Credible Intervals, and Bayes Factors are used to update beliefs and compare hypotheses.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- The Engine Room Section -->
+        <section class="mb-16 fade-in">
+            <h2 class="text-3xl font-bold text-center mb-8 text-slate-800 dark:text-slate-100">The Engine Room: Key Mechanics</h2>
+            <div class="grid md:grid-cols-2 gap-8">
+                <!-- Frequentist Mechanics -->
+                <div class="card frequentist-card p-6">
+                    <h3 class="text-xl font-bold text-blue-600 dark:text-blue-400 mb-4">Null Hypothesis Significance Testing (NHST)</h3>
+                    <p class="mb-4">A formal procedure assuming "no effect" (H₀) and testing if the data are surprising enough to reject that assumption.</p>
+                    <div class="space-y-4">
+                        <div>
+                            <p class="font-semibold text-slate-700 dark:text-slate-300">P-value: A Measure of Surprise</p>
+                            <p class="text-slate-600 dark:text-slate-400">The probability of getting your result (or more extreme) <strong class="text-red-500">IF the null hypothesis is true</strong>. A small p-value (e.g., < 0.05) means the data is surprising, providing evidence against the null.</p>
+                             <p class="mt-2 text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/50 p-3 rounded-lg"><strong>Common Pitfall:</strong> The p-value is NOT the probability that the null hypothesis is true.</p>
+                        </div>
+                        <div>
+                            <p class="font-semibold text-slate-700 dark:text-slate-300">95% Confidence Interval (CI): A Range for the Truth</p>
+                            <p class="text-slate-600 dark:text-slate-400">A range of plausible values for the true parameter. The "95% confidence" is a property of the method, not the specific interval.</p>
+                            <p class="mt-2 text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/50 p-3 rounded-lg"><strong>Correct Interpretation:</strong> "If we repeated this study many times, 95% of the CIs calculated would contain the true value." It's about the long-run performance of the procedure.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bayesian Mechanics -->
+                <div class="card bayesian-card p-6">
+                    <h3 class="text-xl font-bold text-violet-600 dark:text-violet-400 mb-4">Bayes' Theorem: The Engine of Learning</h3>
+                     <div class="bg-slate-100 dark:bg-slate-800 p-4 rounded-lg text-center mb-4">
+                        <p class="text-lg font-mono text-violet-700 dark:text-violet-300">
+                           <span class="font-bold">Posterior</span> ∝ <span class="text-blue-600 dark:text-blue-400">Likelihood</span> × <span class="text-green-600 dark:text-green-400">Prior</span>
+                        </p>
+                        <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
+                           <span class="font-bold">Updated Belief</span> = <span class="text-blue-600 dark:text-blue-400">Evidence from Data</span> × <span class="text-green-600 dark:text-green-400">Initial Belief</span>
+                        </p>
+                    </div>
+                    <div class="space-y-4">
+                        <div>
+                            <p class="font-semibold text-slate-700 dark:text-slate-300">95% Credible Interval: An Intuitive Range</p>
+                            <p class="text-slate-600 dark:text-slate-400">A range of values for the parameter with a direct probabilistic meaning.</p>
+                            <p class="mt-2 text-sm text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/50 p-3 rounded-lg"><strong>Correct Interpretation:</strong> "Given our data and model, there is a 95% probability that the true value lies within this interval." This is what most people *think* a confidence interval means.</p>
+                        </div>
+                        <div>
+                            <p class="font-semibold text-slate-700 dark:text-slate-300">Bayes Factor (BF): Weighing the Evidence</p>
+                            <p class="text-slate-600 dark:text-slate-400">Directly compares how well two competing hypotheses predict the data. A BF₁₀ of 15 means the data are 15 times more likely under the alternative hypothesis (H₁) than the null (H₀). Crucially, it can also provide evidence *for* the null.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Comparison Table -->
+        <section class="mb-16 fade-in">
+             <h2 class="text-3xl font-bold text-center mb-8 text-slate-800 dark:text-slate-100">At a Glance: Core Differences</h2>
+             <div class="card overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead>
+                            <tr class="bg-slate-50 dark:bg-slate-800">
+                                <th class="p-4 font-semibold text-slate-700 dark:text-slate-300">Feature</th>
+                                <th class="p-4 font-semibold text-blue-700 dark:text-blue-300">Frequentist Approach</th>
+                                <th class="p-4 font-semibold text-violet-700 dark:text-violet-300">Bayesian Approach</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
+                            <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                                <td class="p-4 font-semibold">Definition of Probability</td>
+                                <td class="p-4">Long-run frequency of an event; objective property of the world.</td>
+                                <td class="p-4">Degree of belief in a proposition; subjective property of an observer's knowledge.</td>
+                            </tr>
+                             <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                                <td class="p-4 font-semibold">Nature of Parameters</td>
+                                <td class="p-4">Fixed, unknown constants. Cannot make probability statements about them.</td>
+                                <td class="p-4">Random variables with probability distributions representing uncertainty.</td>
+                            </tr>
+                             <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                                <td class="p-4 font-semibold">Primary Question</td>
+                                <td class="p-4">"What is P(Data | H₀)?" (Probability of the data, assuming no effect)</td>
+                                <td class="p-4">"What is P(H₁ | Data)?" (Probability of the hypothesis, given the data)</td>
+                            </tr>
+                             <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                                <td class="p-4 font-semibold">Interval Interpretation</td>
+                                <td class="p-4"><strong>Confidence Interval:</strong> If repeated, 95% of intervals would contain the true value.</td>
+                                <td class="p-4"><strong>Credible Interval:</strong> There is a 95% probability the true value lies in this specific interval.</td>
+                            </tr>
+                             <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                                <td class="p-4 font-semibold">Prior Information</td>
+                                <td class="p-4">Not formally incorporated into calculations.</td>
+                                <td class="p-4">Formally incorporated via the Prior distribution.</td>
+                            </tr>
+                             <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                                <td class="p-4 font-semibold">Ability to Support the Null</td>
+                                <td class="p-4">Cannot prove the null. Can only "fail to reject" it.</td>
+                                <td class="p-4">Can provide evidence for the null via Bayes Factors.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+             </div>
+        </section>
+
+        <!-- Bayesian Mind in the ED -->
+        <section class="mb-16 fade-in">
+            <h2 class="text-3xl font-bold text-center mb-2 text-slate-800 dark:text-slate-100">The Bayesian Mind in the Emergency Department</h2>
+            <p class="text-center text-lg text-slate-600 dark:text-slate-400 mb-8">Clinical judgement is an intuitive act of Bayesian updating. Formalising it can reduce diagnostic error.</p>
+
+            <div class="card p-6 md:p-8">
+                <h3 class="text-2xl font-bold text-center mb-2 text-violet-700 dark:text-violet-400">Interactive Case Study: Diagnosing Pulmonary Embolism</h3>
+                <p class="text-center text-slate-600 dark:text-slate-400 mb-6">Let's walk through a case using formal Bayesian reasoning to see how our belief (probability) shifts with new evidence.</p>
+                
+                <div id="pe-calculator">
+                    <!-- Step 1: Pre-test probability -->
+                    <div class="pe-step active text-center p-4 rounded-lg bg-slate-50 dark:bg-slate-800" data-step="1">
+                        <p class="font-semibold text-lg">Step 1: Establish the Prior (Pre-Test Probability)</p>
+                        <p class="text-slate-600 dark:text-slate-400">A 55-year-old male with pleuritic chest pain and tachycardia. Wells' score stratifies him into the <strong class="text-slate-800 dark:text-slate-200">Moderate Risk</strong> category.</p>
+                        <p class="mt-2 text-xl font-bold">Pre-Test Probability (PTP) of PE: <span id="ptp-value">20%</span></p>
+                        <button class="mt-4 bg-violet-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-violet-700 transition" onclick="nextStep(2)">Proceed with D-dimer Test</button>
+                    </div>
+
+                    <!-- Step 2: D-dimer -->
+                     <div class="pe-step mt-6 text-center p-4 rounded-lg bg-slate-50 dark:bg-slate-800" data-step="2">
+                        <p class="font-semibold text-lg">Step 2: Incorporate Evidence (D-dimer)</p>
+                        <p class="text-slate-600 dark:text-slate-400">The D-dimer test comes back <strong class="text-red-500">Positive</strong>. A positive result in a moderate-risk patient has a Likelihood Ratio (LR) of ~2.0, increasing our suspicion.</p>
+                         <button class="mt-4 bg-violet-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-violet-700 transition" onclick="nextStep(3)">Calculate Post-Test Probability</button>
+                    </div>
+
+                    <!-- Step 3: CTPA -->
+                    <div class="pe-step mt-6 text-center p-4 rounded-lg bg-slate-50 dark:bg-slate-800" data-step="3">
+                        <p class="font-semibold text-lg">Step 3: Definitive Imaging (CTPA)</p>
+                        <p class="text-slate-600 dark:text-slate-400">The diagnosis is still uncertain, so we proceed to CTPA. The scan is <strong class="text-red-500">Positive</strong> for a segmental PE. This has a very high LR of ~20.0.</p>
+                        <button class="mt-4 bg-violet-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-violet-700 transition" onclick="nextStep(4)">Calculate Final Probability</button>
+                    </div>
+                </div>
+
+                <!-- Probability Visualizer -->
+                <div class="mt-8">
+                    <h4 class="text-lg font-semibold text-center mb-4">Probability of Pulmonary Embolism</h4>
+                    <div class="w-full probability-bar-bg rounded-full h-8 dark:bg-gray-700">
+                        <div id="probability-bar" class="probability-bar h-8 rounded-full text-center text-white font-bold flex items-center justify-center" style="width: 20%;">20%</div>
+                    </div>
+                    <div class="flex justify-between text-xs mt-1 text-slate-500">
+                        <span>Rule Out</span>
+                        <span>Testing Threshold</span>
+                        <span>Treat</span>
+                    </div>
+                </div>
+                 <div class="mt-6 text-center">
+                    <button class="text-sm text-slate-500 hover:text-slate-700 dark:hover:text-slate-300" onclick="resetCalculator()">Reset Simulation</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Conclusion -->
+        <footer class="text-center py-8 border-t border-slate-200 dark:border-slate-700 fade-in">
+             <h2 class="text-3xl font-bold text-center mb-4 text-slate-800 dark:text-slate-100">Towards a Unified Statistical Literacy</h2>
+            <p class="max-w-3xl mx-auto text-slate-600 dark:text-slate-400 mb-4">
+                The debate isn't about one framework defeating the other. It's about becoming "bilingual" — understanding the right tool for the right question.
+            </p>
+            <div class="grid md:grid-cols-2 gap-4 max-w-3xl mx-auto">
+                <div class="bg-blue-50 dark:bg-blue-900/50 text-blue-800 dark:text-blue-300 p-4 rounded-lg text-left">
+                    <strong>Frequentist methods</strong> remain the standard for large, confirmatory trials where controlling long-run error rates for regulatory approval is paramount.
+                </div>
+                <div class="bg-violet-50 dark:bg-violet-900/50 text-violet-800 dark:text-violet-300 p-4 rounded-lg text-left">
+                    <strong>Bayesian methods</strong> excel in adaptive trials, rare diseases, and formalising the diagnostic reasoning we use at the bedside every day to make better, more explicit decisions under pressure.
+                </div>
+            </div>
+        </footer>
+
+    </div>
+
+    <script>
+        // --- Dark Mode Functionality ---
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        const sunIcon = document.getElementById('sun-icon');
+        const moonIcon = document.getElementById('moon-icon');
+
+        if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+            sunIcon.classList.add('hidden');
+            moonIcon.classList.remove('hidden');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+
+        darkModeToggle.addEventListener('click', function() {
+            document.documentElement.classList.toggle('dark');
+            sunIcon.classList.toggle('hidden');
+            moonIcon.classList.toggle('hidden');
+
+            if (document.documentElement.classList.contains('dark')) {
+                localStorage.setItem('color-theme', 'dark');
+            } else {
+                localStorage.setItem('color-theme', 'light');
+            }
+        });
+
+        // --- Fade-in on Scroll ---
+        const faders = document.querySelectorAll('.fade-in');
+        const appearOptions = {
+            threshold: 0.2,
+            rootMargin: "0px 0px -50px 0px"
+        };
+        const appearOnScroll = new IntersectionObserver(function(entries, appearOnScroll) {
+            entries.forEach(entry => {
+                if (!entry.isIntersecting) {
+                    return;
+                } else {
+                    entry.target.classList.add('visible');
+                    appearOnScroll.unobserve(entry.target);
+                }
+            });
+        }, appearOptions);
+
+        faders.forEach(fader => {
+            appearOnScroll.observe(fader);
+        });
+        
+        // --- PE Calculator ---
+        const probabilityBar = document.getElementById('probability-bar');
+        const ptpValue = document.getElementById('ptp-value');
+        const allSteps = document.querySelectorAll('.pe-step');
+
+        const stateProbabilities = {
+            1: 20, // Initial PTP
+            2: 33, // After D-dimer
+            3: 91  // After CTPA
+        };
+
+        function oddsToProb(odds) {
+            return (odds / (1 + odds)) * 100;
+        }
+
+        function probToOdds(prob) {
+            return prob / (100 - prob);
+        }
+
+        function updateProbabilityBar(prob) {
+            const roundedProb = Math.round(prob);
+            probabilityBar.style.width = `${roundedProb}%`;
+            probabilityBar.textContent = `${roundedProb}%`;
+        }
+
+        function nextStep(stepNumber) {
+            const currentStep = document.querySelector(`.pe-step[data-step="${stepNumber-1}"]`);
+            const nextStepEl = document.querySelector(`.pe-step[data-step="${stepNumber}"]`);
+            
+            if(stepNumber === 2) { // D-dimer result
+                const ptp = 20;
+                const preTestOdds = probToOdds(ptp);
+                const lr = 2.0;
+                const postTestOdds = preTestOdds * lr;
+                const postTestProb = oddsToProb(postTestOdds);
+                updateProbabilityBar(postTestProb);
+            } else if (stepNumber === 3) { // Show CTPA step
+                // No change in probability yet
+            } else if (stepNumber === 4) { // CTPA result
+                const currentProb = 33.33;
+                const currentOdds = probToOdds(currentProb);
+                const lr = 20.0;
+                const finalOdds = currentOdds * lr;
+                const finalProb = oddsToProb(finalOdds);
+                updateProbabilityBar(finalProb);
+            }
+
+            if(currentStep) {
+                const button = currentStep.querySelector('button');
+                if(button) button.style.display = 'none';
+            }
+
+            if (nextStepEl) {
+                nextStepEl.classList.add('active');
+                 // Scroll into view
+                nextStepEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+        
+        function resetCalculator() {
+            updateProbabilityBar(20);
+            allSteps.forEach((step, index) => {
+                const button = step.querySelector('button');
+                if(button) button.style.display = 'inline-block';
+
+                if (index === 0) {
+                    step.classList.add('active');
+                } else {
+                    step.classList.remove('active');
+                }
+            });
+        }
+        
+        // Initial state
+        document.addEventListener('DOMContentLoaded', () => {
+             faders.forEach(fader => {
+                if(fader.getBoundingClientRect().top < window.innerHeight) {
+                    fader.classList.add('visible');
+                }
+            });
+            resetCalculator();
+        });
+
+
+    </script>
+</body>
+</html>
